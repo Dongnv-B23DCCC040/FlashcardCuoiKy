@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.FlashcardCuoiKy">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".LoginActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FlashcardCuoiKy" />
+        <activity
+            android:name=".RegisterActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FlashcardCuoiKy" />
+        <activity
+            android:name=".HomeActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FlashcardCuoiKy" />
+        <activity
+            android:name=".ProfileActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FlashcardCuoiKy" />
+        <activity
+            android:name=".StudyActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FlashcardCuoiKy" />
+        <activity
+            android:name=".TermsListActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FlashcardCuoiKy" />
+        <activity
+            android:name=".FlashcardActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FlashcardCuoiKy" />
+        <activity
+            android:name=".TestActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FlashcardCuoiKy" />
+        <activity
+            android:name=".ListenActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FlashcardCuoiKy" />
+        <activity
+            android:name=".ReadActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FlashcardCuoiKy" />
+        <activity
+            android:name=".WriteActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FlashcardCuoiKy" />
+        <activity
+            android:name=".GrammarActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FlashcardCuoiKy" />
+        <activity
+            android:name=".LibraryActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FlashcardCuoiKy" />
+        <activity
+            android:name=".NotificationsActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FlashcardCuoiKy" />
+        <activity
+            android:name=".FoldersActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FlashcardCuoiKy" />
+        <activity
+            android:name=".NewFolderActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FlashcardCuoiKy" />
+        <activity
+            android:name=".FlashcardsLibraryActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FlashcardCuoiKy" />
+        <activity
+            android:name=".SolutionsActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FlashcardCuoiKy" />
+        <activity
+            android:name=".GrammarDetailActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FlashcardCuoiKy" />
+    </application>
+
+</manifest>
