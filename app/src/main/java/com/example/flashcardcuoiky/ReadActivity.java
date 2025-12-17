@@ -1,5 +1,6 @@
 package com.example.flashcardcuoiky;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -21,29 +22,24 @@ public class ReadActivity extends AppCompatActivity {
     private View buttonPrevious, buttonNext;
 
     // Question data
-    private List<ReadingQuestion> questions;
+    private List<VocabularyHelper.ReadingQuestion> questions;
     private int currentQuestionIndex = 0;
     private int totalQuestions = 147;
-
-    // Reading question class
-    private class ReadingQuestion {
-        String passage;
-        String question;
-        String[] options;
-        int correctAnswer; // 0-3 index
-
-        ReadingQuestion(String passage, String question, String[] options, int correctAnswer) {
-            this.passage = passage;
-            this.question = question;
-            this.options = options;
-            this.correctAnswer = correctAnswer;
-        }
-    }
+    private String setTitle = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_read);
+
+        // Get set title from intent
+        Intent intent = getIntent();
+        if (intent != null) {
+            setTitle = intent.getStringExtra("set_title");
+            if (setTitle == null) {
+                setTitle = "";
+            }
+        }
 
         // Initialize views
         imageViewBack = findViewById(R.id.imageViewBack);
@@ -125,46 +121,51 @@ public class ReadActivity extends AppCompatActivity {
     }
 
     private void initializeQuestions() {
-        questions = new ArrayList<>();
-        
-        // Reading comprehension questions based on vocabulary
-        questions.add(new ReadingQuestion(
-            "The kitchen is equipped with modern appliances. There is a cabinet for storing dishes, a toaster for making toast, a dishwasher for cleaning dishes, and an oven for baking.",
-            "What is used for storing dishes?",
-            new String[]{"Toaster", "Dishwasher", "Oven", "Cabinet"}, 3));
-        
-        questions.add(new ReadingQuestion(
-            "To prepare the cake, you need to mix the ingredients in a bowl. Then you should pour the mixture into a pan and bake it in the oven.",
-            "What should you do first when preparing a cake?",
-            new String[]{"Pour", "Bake", "Mix", "Stir"}, 2));
-        
-        questions.add(new ReadingQuestion(
-            "When cooking soup, first you need to boil water in a pot. Then add vegetables and let them cook. Don't forget to stir occasionally.",
-            "What should you do to the water first?",
-            new String[]{"Stir", "Add vegetables", "Boil", "Cook"}, 2));
-        
-        questions.add(new ReadingQuestion(
-            "For a healthy meal, you can steam vegetables instead of frying them. Steaming preserves more nutrients than other cooking methods.",
-            "What cooking method preserves more nutrients?",
-            new String[]{"Frying", "Steaming", "Boiling", "Roasting"}, 1));
-        
-        questions.add(new ReadingQuestion(
-            "Before cooking, you should prepare the ingredients. Slice the vegetables, chop the herbs, and peel the potatoes.",
-            "What should you do to potatoes before cooking?",
-            new String[]{"Slice", "Chop", "Peel", "Dice"}, 2));
-        
-        // Add more questions to reach 147
-        for (int i = 5; i < totalQuestions; i++) {
-            questions.add(new ReadingQuestion(
-                "This is a reading passage about vocabulary word " + i + ". Read carefully and answer the question.",
-                "What is the main topic?",
-                new String[]{"Option A", "Option B", "Option C", "Option D"}, i % 4));
+        // Load reading questions based on set title
+        if (setTitle != null && (setTitle.equalsIgnoreCase("Động vật") || setTitle.equalsIgnoreCase("Dong vat"))) {
+            questions = VocabularyHelper.getAnimalReadingQuestions();
+        } else {
+            // Default reading questions
+            questions = new ArrayList<>();
+            questions.add(new VocabularyHelper.ReadingQuestion(
+                "The kitchen is equipped with modern appliances. There is a cabinet for storing dishes, a toaster for making toast, a dishwasher for cleaning dishes, and an oven for baking.",
+                "What is used for storing dishes?",
+                new String[]{"Toaster", "Dishwasher", "Oven", "Cabinet"}, 3));
+            
+            questions.add(new VocabularyHelper.ReadingQuestion(
+                "To prepare the cake, you need to mix the ingredients in a bowl. Then you should pour the mixture into a pan and bake it in the oven.",
+                "What should you do first when preparing a cake?",
+                new String[]{"Pour", "Bake", "Mix", "Stir"}, 2));
+            
+            questions.add(new VocabularyHelper.ReadingQuestion(
+                "When cooking soup, first you need to boil water in a pot. Then add vegetables and let them cook. Don't forget to stir occasionally.",
+                "What should you do to the water first?",
+                new String[]{"Stir", "Add vegetables", "Boil", "Cook"}, 2));
+            
+            questions.add(new VocabularyHelper.ReadingQuestion(
+                "For a healthy meal, you can steam vegetables instead of frying them. Steaming preserves more nutrients than other cooking methods.",
+                "What cooking method preserves more nutrients?",
+                new String[]{"Frying", "Steaming", "Boiling", "Roasting"}, 1));
+            
+            questions.add(new VocabularyHelper.ReadingQuestion(
+                "Before cooking, you should prepare the ingredients. Slice the vegetables, chop the herbs, and peel the potatoes.",
+                "What should you do to potatoes before cooking?",
+                new String[]{"Slice", "Chop", "Peel", "Dice"}, 2));
+            
+            // Add more questions to reach 147
+            for (int i = 5; i < totalQuestions; i++) {
+                questions.add(new VocabularyHelper.ReadingQuestion(
+                    "This is a reading passage about vocabulary word " + i + ". Read carefully and answer the question.",
+                    "What is the main topic?",
+                    new String[]{"Option A", "Option B", "Option C", "Option D"}, i % 4));
+            }
         }
+        totalQuestions = questions.size();
     }
 
     private void displayQuestion(int index) {
         if (index >= 0 && index < questions.size()) {
-            ReadingQuestion question = questions.get(index);
+            VocabularyHelper.ReadingQuestion question = questions.get(index);
             textViewPassage.setText(question.passage);
             textViewQuestion.setText(question.question);
             
@@ -201,7 +202,7 @@ public class ReadActivity extends AppCompatActivity {
     private void checkAnswer(Button button, int selectedIndex) {
         if (currentQuestionIndex >= questions.size()) return;
         
-        ReadingQuestion question = questions.get(currentQuestionIndex);
+        VocabularyHelper.ReadingQuestion question = questions.get(currentQuestionIndex);
         boolean isCorrect = (selectedIndex == question.correctAnswer);
         
         // Reset all buttons

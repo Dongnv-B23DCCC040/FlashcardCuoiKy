@@ -3,6 +3,7 @@ package com.example.flashcardcuoiky;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -12,6 +13,8 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import java.util.List;
 
 public class FlashcardActivity extends AppCompatActivity {
 
@@ -23,11 +26,30 @@ public class FlashcardActivity extends AppCompatActivity {
     private boolean isFavorite = false;
     private int currentCard = 1;
     private int totalCards = 147;
+    private String setTitle = "";
+    private List<VocabularyHelper.Question> vocabulary;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_flashcard);
+
+        // Get set title from intent
+        Intent intent = getIntent();
+        if (intent != null) {
+            setTitle = intent.getStringExtra("set_title");
+            if (setTitle == null) {
+                setTitle = "";
+            }
+        }
+
+        // Load vocabulary based on set title
+        if (setTitle != null && (setTitle.equalsIgnoreCase("Động vật") || setTitle.equalsIgnoreCase("Dong vat"))) {
+            vocabulary = VocabularyHelper.getAnimalVocabulary();
+        } else {
+            vocabulary = VocabularyHelper.getDefaultVocabulary();
+        }
+        totalCards = vocabulary.size();
 
         // Initialize views
         textViewCardNumber = findViewById(R.id.textViewCardNumber);
@@ -152,14 +174,12 @@ public class FlashcardActivity extends AppCompatActivity {
     private void updateCard() {
         textViewCardNumber.setText(currentCard + "/" + totalCards);
         
-        // Example card data - in real app, get from database/API
-        String[] words = {"Toaster", "Cabinet", "Dishwasher", "Oven", "Microwave"};
-        String[] phonetics = {"/toustə/", "/'kæbinit/", "/'diʃ, wɔ:tə/", "/'ʌvən/", "/'maikrəweiv/"};
-        String[] translations = {"Máy nướng bánh mỳ", "Tủ", "Máy rửa bát", "Lò nướng", "Lò vi sóng"};
-        
-        int index = (currentCard - 1) % words.length;
-        textViewFrontWord.setText(words[index]);
-        textViewBackContent.setText(phonetics[index] + "\n\n" + translations[index]);
+        if (vocabulary != null && vocabulary.size() > 0) {
+            int index = (currentCard - 1) % vocabulary.size();
+            VocabularyHelper.Question question = vocabulary.get(index);
+            textViewFrontWord.setText(question.term);
+            textViewBackContent.setText(question.phonetic + "\n\n" + question.translation);
+        }
     }
 
     private void flipCard() {

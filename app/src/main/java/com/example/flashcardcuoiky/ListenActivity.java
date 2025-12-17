@@ -1,5 +1,6 @@
 package com.example.flashcardcuoiky;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -22,31 +23,24 @@ public class ListenActivity extends AppCompatActivity {
     private View buttonPrevious, buttonNext;
 
     // Question data
-    private List<Question> questions;
+    private List<VocabularyHelper.Question> questions;
     private int currentQuestionIndex = 0;
     private int totalQuestions = 147;
-
-    // Question class
-    private class Question {
-        String term;
-        String phonetic;
-        String translation;
-        String[] options;
-        int correctAnswer; // 0-3 index
-
-        Question(String term, String phonetic, String translation, String[] options, int correctAnswer) {
-            this.term = term;
-            this.phonetic = phonetic;
-            this.translation = translation;
-            this.options = options;
-            this.correctAnswer = correctAnswer;
-        }
-    }
+    private String setTitle = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_listen);
+
+        // Get set title from intent
+        Intent intent = getIntent();
+        if (intent != null) {
+            setTitle = intent.getStringExtra("set_title");
+            if (setTitle == null) {
+                setTitle = "";
+            }
+        }
 
         // Initialize views
         imageViewBack = findViewById(R.id.imageViewBack);
@@ -119,7 +113,7 @@ public class ListenActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (currentQuestionIndex < questions.size()) {
-                    Question question = questions.get(currentQuestionIndex);
+                    VocabularyHelper.Question question = questions.get(currentQuestionIndex);
                     resetAnswerButtons();
                     Button correctButton = getAnswerButton(question.correctAnswer);
                     correctButton.setBackgroundResource(R.drawable.bg_answer_correct);
@@ -154,49 +148,18 @@ public class ListenActivity extends AppCompatActivity {
     }
 
     private void initializeQuestions() {
-        questions = new ArrayList<>();
-        
-        // Same questions as StudyActivity
-        questions.add(new Question("Cabinet", "/'kæbinit/", "Tủ", 
-            new String[]{"Toaster", "Dishwasher /'diʃ, wɔ:tə/: Máy rửa bát", "Oven", "Cabinet"}, 3));
-        
-        questions.add(new Question("Mix", "/mıks/", "Trộn", 
-            new String[]{"Vỉ nướng", "đánh", "trộn", "/'miksə/: Máy trộn"}, 2));
-        
-        questions.add(new Question("Pour", "/po:r/", "Đổ", 
-            new String[]{"Đổ", "Rót", "Trộn", "Nấu"}, 0));
-        
-        questions.add(new Question("Stir", "/stɜ:/", "Khuấy", 
-            new String[]{"Khuấy", "Đổ", "Trộn", "Nấu"}, 0));
-        
-        questions.add(new Question("Bake", "/beık/", "Nướng", 
-            new String[]{"Nướng", "Rang", "Luộc", "Chiên"}, 0));
-        
-        questions.add(new Question("Boil", "/bɔıl/", "Đun sôi", 
-            new String[]{"Đun sôi", "Nướng", "Chiên", "Hấp"}, 0));
-        
-        questions.add(new Question("Fry", "/fraı/", "Chiên", 
-            new String[]{"Chiên", "Nướng", "Luộc", "Hấp"}, 0));
-        
-        questions.add(new Question("Grill", "/grıl/", "Nướng", 
-            new String[]{"Nướng", "Chiên", "Luộc", "Hấp"}, 0));
-        
-        questions.add(new Question("Steam", "/sti:m/", "Hấp", 
-            new String[]{"Hấp", "Nướng", "Chiên", "Luộc"}, 0));
-        
-        questions.add(new Question("Roast", "/roʊst/", "Quay", 
-            new String[]{"Quay", "Nướng", "Chiên", "Luộc"}, 0));
-        
-        // Add more questions to reach 147
-        for (int i = 10; i < totalQuestions; i++) {
-            questions.add(new Question("Word" + i, "/wɜ:rd" + i + "/", "Từ " + i, 
-                new String[]{"Option A", "Option B", "Option C", "Option D"}, i % 4));
+        // Load vocabulary based on set title
+        if (setTitle != null && (setTitle.equalsIgnoreCase("Động vật") || setTitle.equalsIgnoreCase("Dong vat"))) {
+            questions = VocabularyHelper.getAnimalVocabulary();
+        } else {
+            questions = VocabularyHelper.getDefaultVocabulary();
         }
+        totalQuestions = questions.size();
     }
 
     private void displayQuestion(int index) {
         if (index >= 0 && index < questions.size()) {
-            Question question = questions.get(index);
+            VocabularyHelper.Question question = questions.get(index);
             textViewTerm.setText(question.term);
             textViewPhonetic.setText(question.phonetic);
             textViewTranslation.setText(question.translation);
@@ -235,7 +198,7 @@ public class ListenActivity extends AppCompatActivity {
     private void checkAnswer(Button button, int selectedIndex) {
         if (currentQuestionIndex >= questions.size()) return;
         
-        Question question = questions.get(currentQuestionIndex);
+        VocabularyHelper.Question question = questions.get(currentQuestionIndex);
         boolean isCorrect = (selectedIndex == question.correctAnswer);
         
         // Reset all buttons

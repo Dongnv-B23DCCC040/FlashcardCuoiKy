@@ -1,12 +1,16 @@
 package com.example.flashcardcuoiky;
 
+import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -24,10 +28,20 @@ public class TestActivity extends AppCompatActivity {
     private LinearLayout questionListContainer;
     private View sidebar;
     
-    private List<Question> questions;
+    // Bottom controls
+    private ToggleButton toggleProgress;
+    private ImageView buttonPreviousBottom, buttonNextBottom;
+    private ImageView imageViewPlayBottom, imageViewFullscreenBottom;
+    private ImageView imageViewSettingsBottom, imageViewLayoutBottom;
+    
+    private List<VocabularyHelper.Question> questions;
     private int currentQuestionIndex = 0;
     private int totalQuestions = 20;
     private boolean isSidebarVisible = true;
+    private boolean isTrackingProgress = false;
+    private boolean isFullscreen = false;
+    private boolean isPlaying = false;
+    private String setTitle = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +60,24 @@ public class TestActivity extends AppCompatActivity {
         textViewDontKnow = findViewById(R.id.textViewDontKnow);
         questionListContainer = findViewById(R.id.questionListContainer);
         sidebar = findViewById(R.id.sidebar);
+        
+        // Bottom controls
+        toggleProgress = findViewById(R.id.toggleProgress);
+        buttonPreviousBottom = findViewById(R.id.buttonPreviousBottom);
+        buttonNextBottom = findViewById(R.id.buttonNextBottom);
+        imageViewPlayBottom = findViewById(R.id.imageViewPlayBottom);
+        imageViewFullscreenBottom = findViewById(R.id.imageViewFullscreenBottom);
+        imageViewSettingsBottom = findViewById(R.id.imageViewSettingsBottom);
+        imageViewLayoutBottom = findViewById(R.id.imageViewLayoutBottom);
+
+        // Get set title from intent
+        Intent intent = getIntent();
+        if (intent != null) {
+            setTitle = intent.getStringExtra("set_title");
+            if (setTitle == null) {
+                setTitle = "";
+            }
+        }
 
         // Initialize questions
         initializeQuestions();
@@ -135,18 +167,70 @@ public class TestActivity extends AppCompatActivity {
                 showCorrectAnswer();
             }
         });
+        
+        // Bottom controls
+        toggleProgress.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            isTrackingProgress = isChecked;
+            Toast.makeText(TestActivity.this, 
+                isChecked ? "Đã bật theo dõi tiến độ" : "Đã tắt theo dõi tiến độ", 
+                Toast.LENGTH_SHORT).show();
+        });
+        
+        buttonPreviousBottom.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                previousQuestion();
+            }
+        });
+        
+        buttonNextBottom.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                nextQuestion();
+            }
+        });
+        
+        imageViewPlayBottom.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                togglePlay();
+            }
+        });
+        
+        imageViewFullscreenBottom.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                toggleFullscreen();
+            }
+        });
+        
+        imageViewSettingsBottom.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(TestActivity.this, "Cài đặt bài kiểm tra", Toast.LENGTH_SHORT).show();
+            }
+        });
+        
+        imageViewLayoutBottom.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                toggleLayout();
+            }
+        });
     }
 
     private void initializeQuestions() {
-        questions = new ArrayList<>();
-        // Sample questions
-        questions.add(new Question("mix", "/mıks/", "trộn", 
-            new String[]{"Vỉ nướng", "đánh", "trộn", "/'miksə/: Máy trộn"}, 2));
-        questions.add(new Question("pour", "/po:r/", "đổ", 
-            new String[]{"Đổ", "Rót", "Trộn", "Nấu"}, 0));
-        questions.add(new Question("stir", "/stɜ:/", "khuấy", 
-            new String[]{"Khuấy", "Đổ", "Trộn", "Nấu"}, 0));
-        // Add more questions as needed
+        // Load vocabulary based on set title
+        if (setTitle != null && (setTitle.equalsIgnoreCase("Động vật") || setTitle.equalsIgnoreCase("Dong vat"))) {
+            questions = VocabularyHelper.getAnimalVocabulary();
+        } else {
+            questions = VocabularyHelper.getDefaultVocabulary();
+        }
+        // Limit to 20 questions for test
+        if (questions.size() > 20) {
+            questions = questions.subList(0, 20);
+        }
+        totalQuestions = questions.size();
     }
 
     private void setupQuestionList() {
@@ -183,7 +267,7 @@ public class TestActivity extends AppCompatActivity {
             return;
         }
         
-        Question question = questions.get(index);
+        VocabularyHelper.Question question = questions.get(index);
         textViewQuestionNumber.setText((index + 1) + "/" + totalQuestions);
         textViewTerm.setText(question.term);
         textViewPhonetic.setText(question.phonetic);
@@ -209,7 +293,7 @@ public class TestActivity extends AppCompatActivity {
     }
 
     private void checkAnswer(int selectedIndex, Button selectedButton) {
-        Question question = questions.get(currentQuestionIndex);
+        VocabularyHelper.Question question = questions.get(currentQuestionIndex);
         boolean isCorrect = (selectedIndex == question.correctAnswer);
         
         resetAnswerButtons();
@@ -248,11 +332,22 @@ public class TestActivity extends AppCompatActivity {
     }
 
     private void showCorrectAnswer() {
-        Question question = questions.get(currentQuestionIndex);
+        VocabularyHelper.Question question = questions.get(currentQuestionIndex);
         resetAnswerButtons();
         Button correctButton = getAnswerButton(question.correctAnswer);
         correctButton.setBackgroundResource(R.drawable.bg_answer_correct);
         correctButton.setTextColor(getResources().getColor(R.color.white));
+    }
+
+    private void previousQuestion() {
+        if (currentQuestionIndex > 0) {
+            currentQuestionIndex--;
+            displayQuestion(currentQuestionIndex);
+            updateProgress();
+            scrollToTop();
+        } else {
+            Toast.makeText(this, "Đây là câu hỏi đầu tiên", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void nextQuestion() {
@@ -260,9 +355,45 @@ public class TestActivity extends AppCompatActivity {
             currentQuestionIndex++;
             displayQuestion(currentQuestionIndex);
             updateProgress();
+            scrollToTop();
         } else {
             Toast.makeText(this, "Hoàn thành bài kiểm tra!", Toast.LENGTH_SHORT).show();
         }
+    }
+    
+    private void scrollToTop() {
+        findViewById(R.id.mainContent).scrollTo(0, 0);
+    }
+    
+    private void togglePlay() {
+        isPlaying = !isPlaying;
+        // You can add actual audio playback logic here
+        Toast.makeText(this, isPlaying ? "Phát âm thanh" : "Dừng âm thanh", Toast.LENGTH_SHORT).show();
+    }
+    
+    private void toggleFullscreen() {
+        isFullscreen = !isFullscreen;
+        if (isFullscreen) {
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                    WindowManager.LayoutParams.FLAG_FULLSCREEN);
+            if (getSupportActionBar() != null) {
+                getSupportActionBar().hide();
+            }
+            sidebar.setVisibility(View.GONE);
+            isSidebarVisible = false;
+        } else {
+            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+            if (getSupportActionBar() != null) {
+                getSupportActionBar().show();
+            }
+        }
+        Toast.makeText(this, isFullscreen ? "Chế độ toàn màn hình" : "Thoát toàn màn hình", 
+            Toast.LENGTH_SHORT).show();
+    }
+    
+    private void toggleLayout() {
+        // Toggle between sidebar visible/hidden
+        toggleSidebar();
     }
 
     private void updateProgress() {
@@ -274,21 +405,5 @@ public class TestActivity extends AppCompatActivity {
         sidebar.setVisibility(isSidebarVisible ? View.VISIBLE : View.GONE);
     }
 
-    // Question model class
-    private static class Question {
-        String term;
-        String phonetic;
-        String translation;
-        String[] options;
-        int correctAnswer;
-
-        Question(String term, String phonetic, String translation, String[] options, int correctAnswer) {
-            this.term = term;
-            this.phonetic = phonetic;
-            this.translation = translation;
-            this.options = options;
-            this.correctAnswer = correctAnswer;
-        }
-    }
 }
 

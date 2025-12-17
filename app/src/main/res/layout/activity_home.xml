@@ -55,13 +55,14 @@
             <!-- Logo -->
             <TextView
                 android:id="@+id/textViewLogo"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:text="Quizlet"
                 android:textSize="22sp"
                 android:textStyle="bold"
                 android:textColor="@color/purple_primary"
                 app:layout_constraintStart_toEndOf="@id/imageViewMenu"
+                app:layout_constraintEnd_toStartOf="@id/imageViewAdd"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
                 android:layout_marginStart="12dp" />
@@ -77,6 +78,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 app:layout_constraintStart_toEndOf="@id/textViewLogo"
+                app:layout_constraintEnd_toStartOf="@id/buttonUpgrade"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
                 android:layout_marginStart="16dp" />
@@ -99,6 +101,7 @@
                 android:maxLines="1"
                 android:ellipsize="end"
                 android:elevation="0dp"
+                app:layout_constraintStart_toEndOf="@id/imageViewAdd"
                 app:layout_constraintEnd_toStartOf="@id/imageViewProfile"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -145,17 +148,13 @@
                     android:textColor="@color/black"
                     android:layout_marginBottom="16dp" />
 
-                <!-- Recent items -->
+                <!-- Recent items (dynamic) -->
                 <LinearLayout
+                    android:id="@+id/layoutRecentContainer"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:background="@color/white">
-
-                    <include layout="@layout/item_recent_study" />
-                    <include layout="@layout/item_recent_study" />
-
-                </LinearLayout>
+                    android:background="@color/white" />
 
                 <!-- Middle section with numbered list -->
                 <TextView
@@ -173,9 +172,12 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <include layout="@layout/item_quiz" />
-                    <include layout="@layout/item_quiz" />
-                    <include layout="@layout/item_quiz" />
+                    <include
+                        android:id="@+id/itemQuiz1"
+                        layout="@layout/item_quiz" />
+                    <include
+                        android:id="@+id/itemQuiz2"
+                        layout="@layout/item_quiz" />
                     <include layout="@layout/item_quiz_highlighted" />
 
                 </LinearLayout>

@@ -1,5 +1,6 @@
 package com.example.flashcardcuoiky;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
@@ -24,27 +25,24 @@ public class WriteActivity extends AppCompatActivity {
     private View buttonPrevious, buttonNext;
 
     // Question data
-    private List<WritingQuestion> questions;
+    private List<VocabularyHelper.WritingQuestion> questions;
     private int currentQuestionIndex = 0;
     private int totalQuestions = 147;
-
-    // Writing question class
-    private class WritingQuestion {
-        String phonetic;
-        String translation;
-        String correctAnswer;
-
-        WritingQuestion(String phonetic, String translation, String correctAnswer) {
-            this.phonetic = phonetic;
-            this.translation = translation;
-            this.correctAnswer = correctAnswer;
-        }
-    }
+    private String setTitle = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_write);
+
+        // Get set title from intent
+        Intent intent = getIntent();
+        if (intent != null) {
+            setTitle = intent.getStringExtra("set_title");
+            if (setTitle == null) {
+                setTitle = "";
+            }
+        }
 
         // Initialize views
         imageViewBack = findViewById(R.id.imageViewBack);
@@ -104,39 +102,44 @@ public class WriteActivity extends AppCompatActivity {
     }
 
     private void initializeQuestions() {
-        questions = new ArrayList<>();
-        
-        // Writing questions based on vocabulary
-        questions.add(new WritingQuestion("/'kæbinit/", "Tủ", "Cabinet"));
-        questions.add(new WritingQuestion("/mıks/", "Trộn", "Mix"));
-        questions.add(new WritingQuestion("/po:r/", "Đổ", "Pour"));
-        questions.add(new WritingQuestion("/stɜ:/", "Khuấy", "Stir"));
-        questions.add(new WritingQuestion("/beık/", "Nướng", "Bake"));
-        questions.add(new WritingQuestion("/bɔıl/", "Đun sôi", "Boil"));
-        questions.add(new WritingQuestion("/fraı/", "Chiên", "Fry"));
-        questions.add(new WritingQuestion("/grıl/", "Nướng", "Grill"));
-        questions.add(new WritingQuestion("/sti:m/", "Hấp", "Steam"));
-        questions.add(new WritingQuestion("/roʊst/", "Quay", "Roast"));
-        questions.add(new WritingQuestion("/slaıs/", "Cắt lát", "Slice"));
-        questions.add(new WritingQuestion("/tʃɑ:p/", "Băm", "Chop"));
-        questions.add(new WritingQuestion("/pi:l/", "Gọt vỏ", "Peel"));
-        questions.add(new WritingQuestion("/daıs/", "Cắt hạt lựu", "Dice"));
-        questions.add(new WritingQuestion("/greıt/", "Bào", "Grate"));
-        questions.add(new WritingQuestion("/wısk/", "Đánh", "Whisk"));
-        questions.add(new WritingQuestion("/ni:d/", "Nhào", "Knead"));
-        questions.add(new WritingQuestion("/'mærıneıt/", "Ướp", "Marinate"));
-        questions.add(new WritingQuestion("/'si:zən/", "Nêm gia vị", "Season"));
-        questions.add(new WritingQuestion("/'gɑ:rnıʃ/", "Trang trí", "Garnish"));
-        
-        // Add more questions to reach 147
-        for (int i = 20; i < totalQuestions; i++) {
-            questions.add(new WritingQuestion("/wɜ:rd" + i + "/", "Từ " + i, "Word" + i));
+        // Load writing questions based on set title
+        if (setTitle != null && (setTitle.equalsIgnoreCase("Động vật") || setTitle.equalsIgnoreCase("Dong vat"))) {
+            questions = VocabularyHelper.getAnimalWritingQuestions();
+        } else {
+            // Default writing questions
+            questions = new ArrayList<>();
+            questions.add(new VocabularyHelper.WritingQuestion("/'kæbinit/", "Tủ", "Cabinet"));
+            questions.add(new VocabularyHelper.WritingQuestion("/mıks/", "Trộn", "Mix"));
+            questions.add(new VocabularyHelper.WritingQuestion("/po:r/", "Đổ", "Pour"));
+            questions.add(new VocabularyHelper.WritingQuestion("/stɜ:/", "Khuấy", "Stir"));
+            questions.add(new VocabularyHelper.WritingQuestion("/beık/", "Nướng", "Bake"));
+            questions.add(new VocabularyHelper.WritingQuestion("/bɔıl/", "Đun sôi", "Boil"));
+            questions.add(new VocabularyHelper.WritingQuestion("/fraı/", "Chiên", "Fry"));
+            questions.add(new VocabularyHelper.WritingQuestion("/grıl/", "Nướng", "Grill"));
+            questions.add(new VocabularyHelper.WritingQuestion("/sti:m/", "Hấp", "Steam"));
+            questions.add(new VocabularyHelper.WritingQuestion("/roʊst/", "Quay", "Roast"));
+            questions.add(new VocabularyHelper.WritingQuestion("/slaıs/", "Cắt lát", "Slice"));
+            questions.add(new VocabularyHelper.WritingQuestion("/tʃɑ:p/", "Băm", "Chop"));
+            questions.add(new VocabularyHelper.WritingQuestion("/pi:l/", "Gọt vỏ", "Peel"));
+            questions.add(new VocabularyHelper.WritingQuestion("/daıs/", "Cắt hạt lựu", "Dice"));
+            questions.add(new VocabularyHelper.WritingQuestion("/greıt/", "Bào", "Grate"));
+            questions.add(new VocabularyHelper.WritingQuestion("/wısk/", "Đánh", "Whisk"));
+            questions.add(new VocabularyHelper.WritingQuestion("/ni:d/", "Nhào", "Knead"));
+            questions.add(new VocabularyHelper.WritingQuestion("/'mærıneıt/", "Ướp", "Marinate"));
+            questions.add(new VocabularyHelper.WritingQuestion("/'si:zən/", "Nêm gia vị", "Season"));
+            questions.add(new VocabularyHelper.WritingQuestion("/'gɑ:rnıʃ/", "Trang trí", "Garnish"));
+            
+            // Add more questions to reach 147
+            for (int i = 20; i < totalQuestions; i++) {
+                questions.add(new VocabularyHelper.WritingQuestion("/wɜ:rd" + i + "/", "Từ " + i, "Word" + i));
+            }
         }
+        totalQuestions = questions.size();
     }
 
     private void displayQuestion(int index) {
         if (index >= 0 && index < questions.size()) {
-            WritingQuestion question = questions.get(index);
+            VocabularyHelper.WritingQuestion question = questions.get(index);
             textViewHint.setText("Phát âm: " + question.phonetic);
             textViewTranslation.setText("Nghĩa: " + question.translation);
             editTextAnswer.setText("");
@@ -162,7 +165,7 @@ public class WriteActivity extends AppCompatActivity {
 
         if (currentQuestionIndex >= questions.size()) return;
         
-        WritingQuestion question = questions.get(currentQuestionIndex);
+        VocabularyHelper.WritingQuestion question = questions.get(currentQuestionIndex);
         boolean isCorrect = userAnswer.equalsIgnoreCase(question.correctAnswer);
         
         textViewResult.setVisibility(View.VISIBLE);

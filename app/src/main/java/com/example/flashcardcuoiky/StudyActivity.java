@@ -1,6 +1,7 @@
 package com.example.flashcardcuoiky;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -9,6 +10,10 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,31 +30,24 @@ public class StudyActivity extends AppCompatActivity {
     private View imageViewPlay, imageViewFullscreen, imageViewSettings, imageViewLayout;
 
     // Question data
-    private List<Question> questions;
+    private List<VocabularyHelper.Question> questions;
     private int currentQuestionIndex = 0;
     private int totalQuestions = 147;
-
-    // Question class
-    private class Question {
-        String term;
-        String phonetic;
-        String translation;
-        String[] options;
-        int correctAnswer; // 0-3 index
-
-        Question(String term, String phonetic, String translation, String[] options, int correctAnswer) {
-            this.term = term;
-            this.phonetic = phonetic;
-            this.translation = translation;
-            this.options = options;
-            this.correctAnswer = correctAnswer;
-        }
-    }
+    private String setTitle = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_study);
+
+        // Get set title from intent
+        Intent intent = getIntent();
+        if (intent != null) {
+            setTitle = intent.getStringExtra("set_title");
+            if (setTitle == null) {
+                setTitle = "";
+            }
+        }
 
         // Initialize views
         buttonFlashcards = findViewById(R.id.buttonFlashcards);
@@ -79,8 +77,11 @@ public class StudyActivity extends AppCompatActivity {
         imageViewSettings = findViewById(R.id.imageViewSettings);
         imageViewLayout = findViewById(R.id.imageViewLayout);
 
-        // Initialize questions
+        // Initialize questions based on set title
         initializeQuestions();
+        
+        // Update total questions
+        totalQuestions = questions.size();
         
         // Display first question
         displayQuestion(currentQuestionIndex);
@@ -93,6 +94,7 @@ public class StudyActivity extends AppCompatActivity {
                 buttonFlashcards.setBackgroundResource(R.drawable.bg_study_mode_selected);
                 // Navigate to FlashcardActivity
                 Intent intent = new Intent(StudyActivity.this, FlashcardActivity.class);
+                intent.putExtra("set_title", setTitle);
                 startActivity(intent);
             }
         });
@@ -113,6 +115,7 @@ public class StudyActivity extends AppCompatActivity {
                 buttonTest.setBackgroundResource(R.drawable.bg_study_mode_selected);
                 // Navigate to TestActivity
                 Intent intent = new Intent(StudyActivity.this, TestActivity.class);
+                intent.putExtra("set_title", setTitle);
                 startActivity(intent);
             }
         });
@@ -124,6 +127,7 @@ public class StudyActivity extends AppCompatActivity {
                 buttonListen.setBackgroundResource(R.drawable.bg_study_mode_selected);
                 // Navigate to ListenActivity
                 Intent intent = new Intent(StudyActivity.this, ListenActivity.class);
+                intent.putExtra("set_title", setTitle);
                 startActivity(intent);
             }
         });
@@ -135,6 +139,7 @@ public class StudyActivity extends AppCompatActivity {
                 buttonRead.setBackgroundResource(R.drawable.bg_study_mode_selected);
                 // Navigate to ReadActivity
                 Intent intent = new Intent(StudyActivity.this, ReadActivity.class);
+                intent.putExtra("set_title", setTitle);
                 startActivity(intent);
             }
         });
@@ -146,6 +151,7 @@ public class StudyActivity extends AppCompatActivity {
                 buttonWrite.setBackgroundResource(R.drawable.bg_study_mode_selected);
                 // Navigate to WriteActivity
                 Intent intent = new Intent(StudyActivity.this, WriteActivity.class);
+                intent.putExtra("set_title", setTitle);
                 startActivity(intent);
             }
         });
@@ -184,7 +190,7 @@ public class StudyActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (currentQuestionIndex < questions.size()) {
-                    Question question = questions.get(currentQuestionIndex);
+                    VocabularyHelper.Question question = questions.get(currentQuestionIndex);
                     resetAnswerButtons();
                     Button correctButton = getAnswerButton(question.correctAnswer);
                     correctButton.setBackgroundResource(R.drawable.bg_answer_correct);
@@ -316,77 +322,19 @@ public class StudyActivity extends AppCompatActivity {
     private void initializeQuestions() {
         questions = new ArrayList<>();
         
-        // Add many questions
-        questions.add(new Question("Cabinet", "/'kæbinit/", "Tủ", 
-            new String[]{"Toaster", "Dishwasher /'diʃ, wɔ:tə/: Máy rửa bát", "Oven", "Cabinet"}, 3));
-        
-        questions.add(new Question("Mix", "/mıks/", "Trộn", 
-            new String[]{"Vỉ nướng", "đánh", "trộn", "/'miksə/: Máy trộn"}, 2));
-        
-        questions.add(new Question("Pour", "/po:r/", "Đổ", 
-            new String[]{"Đổ", "Rót", "Trộn", "Nấu"}, 0));
-        
-        questions.add(new Question("Stir", "/stɜ:/", "Khuấy", 
-            new String[]{"Khuấy", "Đổ", "Trộn", "Nấu"}, 0));
-        
-        questions.add(new Question("Bake", "/beık/", "Nướng", 
-            new String[]{"Nướng", "Rang", "Luộc", "Chiên"}, 0));
-        
-        questions.add(new Question("Boil", "/bɔıl/", "Đun sôi", 
-            new String[]{"Đun sôi", "Nướng", "Chiên", "Hấp"}, 0));
-        
-        questions.add(new Question("Fry", "/fraı/", "Chiên", 
-            new String[]{"Chiên", "Nướng", "Luộc", "Hấp"}, 0));
-        
-        questions.add(new Question("Grill", "/grıl/", "Nướng", 
-            new String[]{"Nướng", "Chiên", "Luộc", "Hấp"}, 0));
-        
-        questions.add(new Question("Steam", "/sti:m/", "Hấp", 
-            new String[]{"Hấp", "Nướng", "Chiên", "Luộc"}, 0));
-        
-        questions.add(new Question("Roast", "/roʊst/", "Quay", 
-            new String[]{"Quay", "Nướng", "Chiên", "Luộc"}, 0));
-        
-        questions.add(new Question("Slice", "/slaıs/", "Cắt lát", 
-            new String[]{"Cắt lát", "Băm", "Thái", "Cắt nhỏ"}, 0));
-        
-        questions.add(new Question("Chop", "/tʃɑ:p/", "Băm", 
-            new String[]{"Băm", "Cắt lát", "Thái", "Cắt nhỏ"}, 0));
-        
-        questions.add(new Question("Peel", "/pi:l/", "Gọt vỏ", 
-            new String[]{"Gọt vỏ", "Rửa", "Cắt", "Nấu"}, 0));
-        
-        questions.add(new Question("Dice", "/daıs/", "Cắt hạt lựu", 
-            new String[]{"Cắt hạt lựu", "Băm", "Cắt lát", "Thái"}, 0));
-        
-        questions.add(new Question("Grate", "/greıt/", "Bào", 
-            new String[]{"Bào", "Băm", "Cắt", "Thái"}, 0));
-        
-        questions.add(new Question("Whisk", "/wısk/", "Đánh", 
-            new String[]{"Đánh", "Khuấy", "Trộn", "Nấu"}, 0));
-        
-        questions.add(new Question("Knead", "/ni:d/", "Nhào", 
-            new String[]{"Nhào", "Trộn", "Khuấy", "Đánh"}, 0));
-        
-        questions.add(new Question("Marinate", "/'mærıneıt/", "Ướp", 
-            new String[]{"Ướp", "Nấu", "Chiên", "Nướng"}, 0));
-        
-        questions.add(new Question("Season", "/'si:zən/", "Nêm gia vị", 
-            new String[]{"Nêm gia vị", "Nấu", "Chiên", "Nướng"}, 0));
-        
-        questions.add(new Question("Garnish", "/'gɑ:rnıʃ/", "Trang trí", 
-            new String[]{"Trang trí", "Nấu", "Chiên", "Nướng"}, 0));
-        
-        // Add more questions to reach 147
-        for (int i = 20; i < totalQuestions; i++) {
-            questions.add(new Question("Word" + i, "/wɜ:rd" + i + "/", "Từ " + i, 
-                new String[]{"Option A", "Option B", "Option C", "Option D"}, i % 4));
+        // Check if this is the "Động vật" or "Dong vat" set
+        if (setTitle != null && (setTitle.equalsIgnoreCase("Động vật") || setTitle.equalsIgnoreCase("Dong vat"))) {
+            // Load animal vocabulary from helper
+            questions = VocabularyHelper.getAnimalVocabulary();
+        } else {
+            // Load default vocabulary from helper
+            questions = VocabularyHelper.getDefaultVocabulary();
         }
     }
 
     private void displayQuestion(int index) {
         if (index >= 0 && index < questions.size()) {
-            Question question = questions.get(index);
+            VocabularyHelper.Question question = questions.get(index);
             setQuestion(question.term, question.phonetic, question.translation);
             
             // Set answer options
@@ -432,7 +380,7 @@ public class StudyActivity extends AppCompatActivity {
     private void checkAnswer(Button button, int selectedIndex) {
         if (currentQuestionIndex >= questions.size()) return;
         
-        Question question = questions.get(currentQuestionIndex);
+        VocabularyHelper.Question question = questions.get(currentQuestionIndex);
         boolean isCorrect = (selectedIndex == question.correctAnswer);
         
         // Reset all buttons
